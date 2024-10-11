@@ -92,6 +92,9 @@ private:
   bool spvSelect(Register ResVReg, const SPIRVType *ResType,
                  MachineInstr &I) const;
 
+  bool selectFirstBitUHigh(Register ResVReg, const SPIRVType *ResType,
+			   MachineInstr &I) const;
+  
   bool selectGlobalValue(Register ResVReg, MachineInstr &I,
                          const MachineInstr *Init = nullptr) const;
 
@@ -2526,7 +2529,8 @@ bool SPIRVInstructionSelector::selectIntrinsic(Register ResVReg,
   case Intrinsic::spv_sign:
     return selectSign(ResVReg, ResType, I);
   case Intrinsic::spv_firstbituhigh: // There is no CL equivalent of FindUMsb
-    return selectExtInst(ResVReg, ResType, I, GL::FindUMsb);
+    return selectUnOp(ResVReg, ResType, I, SPIRV::OpUConvert);
+    //return selectFirstBitUHigh(ResVReg, ResType, I);
   case Intrinsic::spv_firstbitshigh: // There is no CL equivalent of FindSMsb
     return selectExtInst(ResVReg, ResType, I, GL::FindSMsb);
   case Intrinsic::spv_lifetime_start:
@@ -2570,6 +2574,37 @@ bool SPIRVInstructionSelector::selectIntrinsic(Register ResVReg,
   }
   }
   return true;
+}
+
+bool SPIRVInstructionSelector::selectFirstBitUHigh(Register ResVReg,
+						   const SPIRVType *ResType,
+						   MachineInstr &I) const {
+  // if operand size is 16 bits do a zero extend
+  // if operand size is 64 bits call firstbithigh on high or low 32 bits.
+  // depending on if high 32 bits == 0
+  // because the spirv firstbituhigh intrinsic only supports 32 bit integers
+  Register OpReg = I.getOperand(1).getReg();
+  SPIRVType *OpType = GR.getSPIRVTypeForVReg(OpReg);
+  bool is16 = GR.getScalarOrVectorBitWidth(OpType) == 16;
+
+  //MachineIRBuilder MIRBuilder(I);
+  //const SPIRVType *U32Type = GR.getOrCreateSPIRVIntegerType(32, MIRBuilder);
+  bool Result = true;
+  if (true) {
+    Register ZExtReg = MRI->createVirtualRegister(GR.getRegClass(ResType));
+    // zero extend.
+    Result &= selectUnOp(ResVReg, ResType, I, SPIRV::OpUConvert);
+    return Result;
+    OpReg = ZExtReg;
+  }
+  Result &= BuildMI(*I.getParent(), I, I.getDebugLoc(), TII.get(SPIRV::OpExtInst))
+    .addDef(ResVReg)
+    .addUse(GR.getSPIRVTypeID(ResType))
+    .addImm(static_cast<uint32_t>(SPIRV::InstructionSet::GLSL_std_450))
+    .addImm(GL::FindUMsb)
+    .addUse(OpReg)
+    .constrainAllUses(TII, TRI, RBI);
+  return Result;
 }
 
 bool SPIRVInstructionSelector::selectAllocaArray(Register ResVReg,
