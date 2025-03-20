@@ -2111,18 +2111,6 @@ static bool CheckAllArgsHaveFloatRepresentation(Sema *S, CallExpr *TheCall) {
                                     checkAllFloatTypes);
 }
 
-static bool CheckUnsignedIntRepresentations(Sema *S, CallExpr *TheCall) {
-  auto checkUnsignedInteger = [](clang::QualType PassedType) -> bool {
-    clang::QualType BaseType =
-        PassedType->isVectorType()
-            ? PassedType->getAs<clang::VectorType>()->getElementType()
-            : PassedType;
-    return !BaseType->isUnsignedIntegerType();
-  };
-  return CheckAllArgTypesAreCorrect(S, TheCall, S->Context.UnsignedIntTy,
-                                    checkUnsignedInteger);
-}
-
 static bool CheckFloatOrHalfRepresentations(Sema *S, CallExpr *TheCall) {
   auto checkFloatorHalf = [](clang::QualType PassedType) -> bool {
     clang::QualType BaseType =
@@ -2325,20 +2313,14 @@ bool SemaHLSL::CheckBuiltinFunctionCall(unsigned BuiltinID, CallExpr *TheCall) {
   case Builtin::BI__builtin_hlsl_adduint64: {
     if (SemaRef.checkArgCount(TheCall, 2))
       return true;
-    if (CheckVectorElementCallArgs(&SemaRef, TheCall))
-      return true;
-    if (CheckUnsignedIntRepresentations(&SemaRef, TheCall))
-      return true;
 
-    // CheckVectorElementCallArgs(...) guarantees both args are the same type.
-    assert(TheCall->getArg(0)->getType() == TheCall->getArg(1)->getType() &&
-           "Both args must be of the same type");
-
-    // ensure both args are vectors
+    // ensure first arg is a uint32_t2 or a uint32_t4
+    // ensure vector element type is unsigned int
     auto *VTy = TheCall->getArg(0)->getType()->getAs<VectorType>();
-    if (!VTy) {
-      SemaRef.Diag(TheCall->getBeginLoc(), diag::err_vec_builtin_non_vector)
-          << TheCall->getDirectCallee() << /*all*/ 1;
+    if (!VTy || !VTy->getElementType()->isUnsignedIntegerType()) {
+      SemaRef.Diag(TheCall->getBeginLoc(), diag::err_builtin_invalid_arg_type)
+          << /*ordinal*/ 1 << /*vector of*/ 4 << /*unsigned integer*/ 3
+          << /*no floats*/ 0 << TheCall->getArg(0)->getType();
       return true;
     }
 
@@ -2361,6 +2343,10 @@ bool SemaHLSL::CheckBuiltinFunctionCall(unsigned BuiltinID, CallExpr *TheCall) {
           << 1 /*a multiple of*/ << 64 << NumElementsArg * ElementBitCount;
       return true;
     }
+
+    // ensure first arg and second arg have the same type
+    if (CheckAllArgsHaveSameType(&SemaRef, TheCall))
+      return true;
 
     ExprResult A = TheCall->getArg(0);
     QualType ArgTyA = A.get()->getType();
