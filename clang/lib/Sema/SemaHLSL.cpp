@@ -2394,7 +2394,9 @@ bool SemaHLSL::CheckBuiltinFunctionCall(unsigned BuiltinID, CallExpr *TheCall) {
   case Builtin::BI__builtin_hlsl_asdouble: {
     if (SemaRef.checkArgCount(TheCall, 2))
       return true;
-    if (CheckUnsignedIntRepresentation(&SemaRef, TheCall))
+    if (CheckScalarOrVector(&SemaRef, TheCall, SemaRef.Context.UnsignedIntTy, 0))
+      return true;
+    if (CheckAllArgsHaveSameType(&SemaRef, TheCall))
       return true;
 
     SetElementTypeAsReturnType(&SemaRef, TheCall, getASTContext().DoubleTy);
