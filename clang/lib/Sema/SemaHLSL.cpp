@@ -2374,9 +2374,9 @@ bool SemaHLSL::CheckBuiltinFunctionCall(unsigned BuiltinID, CallExpr *TheCall) {
   case Builtin::BI__builtin_hlsl_or: {
     if (SemaRef.checkArgCount(TheCall, 2))
       return true;
-    if (CheckVectorElementCallArgs(&SemaRef, TheCall))
-      return true;
     if (CheckScalarOrVector(&SemaRef, TheCall, getASTContext().BoolTy, 0))
+      return true;
+    if (CheckAllArgsHaveSameType(&SemaRef, TheCall))
       return true;
 
     ExprResult A = TheCall->getArg(0);
