@@ -1126,6 +1126,157 @@ void case26(TwoInts TI) {
   float4 F = float4(TI, 1, 2);
   float3 F2 = float3(3, TI);
 }
+
+// Check cases with explicit casts
+
+// CHECK-LABEL: define hidden void @_Z6case279TwoFloats(ptr noundef byval(%struct.TwoFloats) align 1 %TF)
+// CHECK: [[TI:%.*]] = alloca %struct.TwoInts, align 1
+// CHECK: [[RT:%.*]] = alloca %struct.TwoInts, align 1
+// CHECK: [[AT:%.*]] = alloca %struct.TwoFloats, align 1
+// CHECK: [[RT6:%.*]] = alloca %struct.TwoInts, align 1
+// CHECK: [[AT7:%.*]] = alloca %struct.TwoFloats, align 1
+// CHECK: [[Z:%.*]] = getelementptr inbounds nuw %struct.TwoInts, ptr [[TI]], i32 0, i32 0
+// CHECK: call void @llvm.memcpy.p0.p0.i32(ptr align 1 [[AT]], ptr align 1 %TF, i32 8, i1 false)
+// CHECK: [[G:%.*]] = getelementptr inbounds %struct.TwoInts, ptr [[RT]], i32 0, i32 0
+// CHECK: [[G1:%.*]] = getelementptr inbounds %struct.TwoInts, ptr [[RT]], i32 0, i32 1
+// CHECK: [[G2:%.*]] = getelementptr inbounds %struct.TwoFloats, ptr [[AT]], i32 0, i32 0
+// CHECK: [[G3:%.*]] = getelementptr inbounds %struct.TwoFloats, ptr [[AT]], i32 0, i32 1
+// CHECK: [[Zero:%.*]] = load float, ptr [[G2]], align 4
+// CHECK: [[Conv:%.*]] = fptosi float [[Zero]] to i32
+// CHECK: store i32 [[Conv]], ptr [[G]], align 4
+// CHECK: [[One:%.*]] = load float, ptr [[G3]], align 4
+// CHECK: [[Conv4:%.*]] = fptosi float [[One]] to i32
+// CHECK: store i32 [[Conv4]], ptr [[G1]], align 4
+// CHECK: [[Z5:%.*]] = getelementptr inbounds nuw %struct.TwoInts, ptr [[RT]], i32 0, i32 0
+// CHECK: [[Two:%.*]] = load i32, ptr [[Z5]], align 1
+// CHECK: store i32 [[Two]], ptr [[Z]], align 1
+// CHECK: [[W:%.*]] = getelementptr inbounds nuw %struct.TwoInts, ptr [[TI]], i32 0, i32 1
+// CHECK: call void @llvm.memcpy.p0.p0.i32(ptr align 1 [[AT7]], ptr align 1 %TF, i32 8, i1 false)
+// CHECK: [[G8:%.*]] = getelementptr inbounds %struct.TwoInts, ptr [[RT6]], i32 0, i32 0
+// CHECK: [[G9:%.*]] = getelementptr inbounds %struct.TwoInts, ptr [[RT6]], i32 0, i32 1
+// CHECK: [[G10:%.*]] = getelementptr inbounds %struct.TwoFloats, ptr [[AT7]], i32 0, i32 0
+// CHECK: [[G11:%.*]] = getelementptr inbounds %struct.TwoFloats, ptr [[AT7]], i32 0, i32 1
+// CHECK: [[Tre:%.*]] = load float, ptr [[G10]], align 4
+// CHECK: [[Conv12:%.*]] = fptosi float [[Tre]] to i32
+// CHECK: store i32 [[Conv12]], ptr [[G8]], align 4
+// CHECK: [[Four:%.*]] = load float, ptr [[G11]], align 4
+// CHECK: [[Conv13:%.*]] = fptosi float [[Four]] to i32
+// CHECK: store i32 [[Conv13]], ptr [[G9]], align 4
+// CHECK: [[W14:%.*]] = getelementptr inbounds nuw %struct.TwoInts, ptr [[RT6]], i32 0, i32 1
+// CHECK: [[Five:%.*]] = load i32, ptr [[W14]], align 1
+// CHECK: store i32 [[Five]], ptr [[W]], align 1
+// CHECK: ret void
+void case27(TwoFloats TF) {
+  TwoInts TI = {(TwoInts)TF};
+}
+
+// CHECK-LABEL: define hidden void @_Z6case2810FourFloats(ptr noundef byval(%struct.FourFloats) align 1 %FF)
+// CHECK: [[Ints:%.*]] = alloca [2 x i32], align 4
+// CHECK: [[RT:%.*]] = alloca [2 x i32], align 4
+// CHECK: [[AT:%.*]] = alloca %struct.FourFloats, align 1
+// CHECK: [[RT7:%.*]] = alloca [2 x i32], align 4
+// CHECK: [[AT8:%.*]] = alloca %struct.FourFloats, align 1
+// CHECK: call void @llvm.memcpy.p0.p0.i32(ptr align 1 [[AT]], ptr align 1 %FF, i32 16, i1 false)
+// CHECK: [[G:%.*]] = getelementptr inbounds [2 x i32], ptr [[RT]], i32 0, i32 0
+// CHECK: [[G1:%.*]] = getelementptr inbounds [2 x i32], ptr [[RT]], i32 0, i32 1
+// CHECK: [[G2:%.*]] = getelementptr inbounds %struct.FourFloats, ptr [[AT]], i32 0, i32 0, i32 0
+// CHECK: [[G3:%.*]] = getelementptr inbounds %struct.FourFloats, ptr [[AT]], i32 0, i32 0, i32 1
+// CHECK: [[G4:%.*]] = getelementptr inbounds %struct.FourFloats, ptr [[AT]], i32 0, i32 1
+// CHECK: [[G5:%.*]] = getelementptr inbounds %struct.FourFloats, ptr [[AT]], i32 0, i32 2
+// CHECK: [[Zero:%.*]] = load float, ptr [[G2]], align 4
+// CHECK: [[Conv:%.*]] = fptosi float [[Zero]] to i32
+// CHECK: store i32 [[Conv]], ptr [[G]], align 4
+// CHECK: [[One:%.*]] = load float, ptr [[G3]], align 4
+// CHECK: [[Conv6:%.*]] = fptosi float [[One]] to i32
+// CHECK: store i32 [[Conv6]], ptr [[G1]], align 4
+// CHECK: [[ArrIdx:%.*]] = getelementptr inbounds nuw [2 x i32], ptr [[RT]], i32 0, i32 0
+// CHECK: [[Two:%.*]] = load i32, ptr [[ArrIdx]], align 4
+// CHECK: store i32 [[Two]], ptr [[Ints]], align 4
+// CHECK: [[ArrInitEl:%.*]] = getelementptr inbounds i32, ptr [[Ints]], i32 1
+// CHECK: call void @llvm.memcpy.p0.p0.i32(ptr align 1 [[AT8]], ptr align 1 %FF, i32 16, i1 false)
+// CHECK: [[G9:%.*]] = getelementptr inbounds [2 x i32], ptr [[RT7]], i32 0, i32 0
+// CHECK: [[G10:%.*]] = getelementptr inbounds [2 x i32], ptr [[RT7]], i32 0, i32 1
+// CHECK: [[G11:%.*]] = getelementptr inbounds %struct.FourFloats, ptr [[AT8]], i32 0, i32 0, i32 0
+// CHECK: [[G12:%.*]] = getelementptr inbounds %struct.FourFloats, ptr [[AT8]], i32 0, i32 0, i32 1
+// CHECK: [[G13:%.*]] = getelementptr inbounds %struct.FourFloats, ptr [[AT8]], i32 0, i32 1
+// CHECK: [[G14:%.*]] = getelementptr inbounds %struct.FourFloats, ptr [[AT8]], i32 0, i32 2
+// CHECK: [[Tre:%.*]] = load float, ptr [[G11]], align 4
+// CHECK: [[Conv15:%.*]] = fptosi float [[Tre]] to i32
+// CHECK: store i32 [[Conv15]], ptr [[G9]], align 4
+// CHECK: [[Four:%.*]] = load float, ptr [[G12]], align 4
+// CHECK: [[Conv16:%.*]] = fptosi float [[Four]] to i32
+// CHECK: store i32 [[Conv16]], ptr [[G10]], align 4
+// CHECK: [[ArrIdx17:%.*]] = getelementptr inbounds nuw [2 x i32], ptr [[RT7]], i32 0, i32 1
+// CHECK: [[Five:%.*]] = load i32, ptr [[ArrIdx17]], align 4
+// CHECK: store i32 [[Five]], ptr [[ArrInitEl]], align 4
+// CHECK: ret void
+void case28(FourFloats FF) {
+  int Ints[2] = {(int[2])FF};
+}
+
+// CHECK-LABEL: define hidden void @_Z6case29v()
+// CHECK: [[Arr:%.*]] = alloca [4 x float], align 4
+// CHECK: [[TI:%.*]] = alloca %struct.TwoInts, align 1
+// CHECK: [[RT:%.*]] = alloca %struct.TwoInts, align 1
+// CHECK: [[AT:%.*]] = alloca [4 x float], align 4
+// CHECK: [[RT8:%.*]] = alloca %struct.TwoInts, align 1
+// CHECK: [[AT9:%.*]] = alloca [4 x float], align 4
+// CHECK: call void @llvm.memcpy.p0.p0.i32(ptr align 4 [[Arr]], ptr align 4 {{.*}}, i32 16, i1 false)
+// CHECK: [[Z:%.*]] = getelementptr inbounds nuw %struct.TwoInts, ptr [[TI]], i32 0, i32 0
+// CHECK: call void @llvm.memcpy.p0.p0.i32(ptr align 4 [[AT]], ptr align 4 [[Arr]], i32 16, i1 false)
+// CHECK: [[G:%.*]] = getelementptr inbounds %struct.TwoInts, ptr [[RT]], i32 0, i32 0
+// CHECK: [[G1:%.*]] = getelementptr inbounds %struct.TwoInts, ptr [[RT]], i32 0, i32 1
+// CHECK: [[G2:%.*]] = getelementptr inbounds [4 x float], ptr [[AT]], i32 0, i32 0
+// CHECK: [[G3:%.*]] = getelementptr inbounds [4 x float], ptr [[AT]], i32 0, i32 1
+// CHECK: [[G4:%.*]] = getelementptr inbounds [4 x float], ptr [[AT]], i32 0, i32 2
+// CHECK: [[G5:%.*]] = getelementptr inbounds [4 x float], ptr [[AT]], i32 0, i32 3
+// CHECK: [[Zero:%.*]] = load float, ptr [[G2]], align 4
+// CHECK: [[Conv:%.*]] = fptosi float [[Zero]] to i32
+// CHECK: store i32 [[Conv]], ptr [[G]], align 4
+// CHECK: [[One:%.*]] = load float, ptr [[G3]], align 4
+// CHECK: [[Conv6:%.*]] = fptosi float [[One]] to i32
+// CHECK: store i32 [[Conv6]], ptr [[G1]], align 4
+// CHECK: [[Z7:%.*]] = getelementptr inbounds nuw %struct.TwoInts, ptr [[RT]], i32 0, i32 0
+// CHECK: [[Two:%.*]] = load i32, ptr [[Z7]], align 1
+// CHECK: store i32 [[Two]], ptr [[Z]], align 1
+// CHECK: [[W:%.*]] = getelementptr inbounds nuw %struct.TwoInts, ptr [[TI]], i32 0, i32 1
+// CHECK: call void @llvm.memcpy.p0.p0.i32(ptr align 4 [[AT9]], ptr align 4 [[Arr]], i32 16, i1 false)
+// CHECK: [[G10:%.*]] = getelementptr inbounds %struct.TwoInts, ptr [[RT8]], i32 0, i32 0
+// CHECK: [[G11:%.*]] = getelementptr inbounds %struct.TwoInts, ptr [[RT8]], i32 0, i32 1
+// CHECK: [[G12:%.*]] = getelementptr inbounds [4 x float], ptr [[AT9]], i32 0, i32 0
+// CHECK: [[G13:%.*]] = getelementptr inbounds [4 x float], ptr [[AT9]], i32 0, i32 1
+// CHECK: [[G14:%.*]] = getelementptr inbounds [4 x float], ptr [[AT9]], i32 0, i32 2
+// CHECK: [[G15:%.*]] = getelementptr inbounds [4 x float], ptr [[AT9]], i32 0, i32 3
+// CHECK: [[Tre:%.*]] = load float, ptr [[G12]], align 4
+// CHECK: [[Conv16:%.*]] = fptosi float [[Tre]] to i32
+// CHECK: store i32 [[Conv16]], ptr [[G10]], align 4
+// CHECK: [[Four:%.*]] = load float, ptr [[G13]], align 4
+// CHECK: [[Conv17:%.*]] = fptosi float [[Four]] to i32
+// CHECK: store i32 [[Conv17]], ptr [[G11]], align 4
+// CHECK: [[W18:%.*]] = getelementptr inbounds nuw %struct.TwoInts, ptr [[RT8]], i32 0, i32 1
+// CHECK: [[Five:%.*]] = load i32, ptr [[W18]], align 1
+// CHECK: store i32 [[Five]], ptr [[W]], align 1
+// CHECK: ret void
+void case29() {
+  float Arr[4] = {1.0,2.0,3.0,4.0};
+  TwoInts TI = {(TwoInts)Arr};
+}
+
+// CHECK-LABEL: define hidden void @_Z6case30v()
+// CHECK: [[F:%.*]] = alloca float, align 4
+// CHECK: [[SB:%.*]] = alloca %struct.SlicyBits, align 1
+// CHECK: store float 1.000000e+00, ptr [[F]], align 4
+// CHECK: [[A:%.*]] = load float, ptr [[F]], align 4
+// CHECK: [[Conv:%.*]] = fptosi float [[A]] to i32
+// CHECK: [[B:%.*]] = trunc i32 [[Conv]] to i8
+// CHECK: store i8 [[B]], ptr [[SB]], align 1
+// CHECK: [[W:%.*]] = getelementptr inbounds nuw %struct.SlicyBits, ptr [[SB]], i32 0, i32 1
+// CHECK: store i8 2, ptr [[W]], align 1
+// CHECK: ret void
+void case30() {
+  float F = 1.0;
+  SlicyBits SB = {(int)F, 2};
+}
 //.
 // CHECK: [[META3]] = !{}
 // CHECK: [[META4]] = !{i64 4}
